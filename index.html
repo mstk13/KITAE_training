@@ -366,16 +366,53 @@ const DEFAULT_MENU = [
 ];
 
 // 週間スケジュール: 週4回トレーニング + 有酸素(ウォーキング)毎日
-// Day1: 下半身筋力+爆発力  Day2: 上半身(押す)+補助
-// Day3: 爆発力+スナッチ    Day4: 上半身(引く)+下半身補助
+// 重量は MAX の 80-85% をメインセット基準に設定
+// Day1(Mon): 下半身筋力+爆発力  Day2(Tue): 上半身(押す)
+// Day3(Thu): 爆発力+スナッチ    Day4(Fri): 上半身(引く)+下半身補助
 const DEFAULT_SCHEDULE = {
-  Mon: ['Squat', 'Front Squat', 'Bulgarian Split Squat', 'Calf Raise', 'Box Jump', 'Depth Jump', 'Walking'],
-  Tue: ['Bench Press', 'Incline Bench Press', 'Overhead Press', 'Dips', 'Walking'],
-  Wed: ['Walking'],
-  Thu: ['Power Clean', 'Snatch', 'Hang Clean', 'Jump Squat', 'Box Jump', 'Single Leg Hop', 'Walking'],
-  Fri: ['Deadlift', 'Romanian Deadlift', 'Barbell Row', 'Pull-ups', 'Hip Thrust', 'Lat Pulldown', 'Walking'],
-  Sat: ['Walking'],
-  Sun: ['Walking'],
+  Mon: [
+    { name: 'Squat',                rx: '5x5 @ 120kg (85%)' },
+    { name: 'Front Squat',          rx: '4x6 @ 90kg' },
+    { name: 'Bulgarian Split Squat',rx: '3x8 each @ 30kg DB' },
+    { name: 'Calf Raise',           rx: '4x15 @ 80kg' },
+    { name: 'Box Jump',             rx: '4x5 (max height)' },
+    { name: 'Depth Jump',           rx: '3x5 (60cm box)' },
+    { name: 'Walking',              rx: '20-30min' },
+  ],
+  Tue: [
+    { name: 'Bench Press',          rx: '5x5 @ 90kg (85%)' },
+    { name: 'Incline Bench Press',  rx: '4x8 @ 70kg' },
+    { name: 'Overhead Press',       rx: '4x6 @ 55kg' },
+    { name: 'Dips',                 rx: '3x10 (加重 +10kg)' },
+    { name: 'Walking',              rx: '20-30min' },
+  ],
+  Wed: [
+    { name: 'Walking',              rx: '20-30min' },
+  ],
+  Thu: [
+    { name: 'Power Clean',          rx: '5x3 @ 70kg' },
+    { name: 'Snatch',               rx: '5x3 @ 50kg (83%)' },
+    { name: 'Hang Clean',           rx: '4x3 @ 65kg' },
+    { name: 'Jump Squat',           rx: '4x5 @ 40kg' },
+    { name: 'Box Jump',             rx: '4x5 (max height)' },
+    { name: 'Single Leg Hop',       rx: '3x5 each' },
+    { name: 'Walking',              rx: '20-30min' },
+  ],
+  Fri: [
+    { name: 'Deadlift',             rx: '5x5 @ 110kg (85%)' },
+    { name: 'Romanian Deadlift',    rx: '4x8 @ 80kg' },
+    { name: 'Barbell Row',          rx: '4x8 @ 70kg' },
+    { name: 'Pull-ups',             rx: '4x8 (加重 +5kg)' },
+    { name: 'Hip Thrust',           rx: '4x10 @ 80kg' },
+    { name: 'Lat Pulldown',         rx: '3x10 @ 55kg' },
+    { name: 'Walking',              rx: '20-30min' },
+  ],
+  Sat: [
+    { name: 'Walking',              rx: '20-30min' },
+  ],
+  Sun: [
+    { name: 'Walking',              rx: '20-30min' },
+  ],
 };
 
 let menu = load('menu', DEFAULT_MENU);
@@ -408,14 +445,20 @@ function renderToday() {
 
   const todayExercises = schedule[dayName] || [];
   const container = document.getElementById('today-menu');
-  if (todayExercises.length === 0 || (todayExercises.length === 1 && todayExercises[0] === 'Rest')) {
+  // support both old format (string) and new format ({name, rx})
+  const getEntry = (item) => typeof item === 'string' ? { name: item, rx: '' } : item;
+  const isRest = todayExercises.length === 0 ||
+    (todayExercises.length === 1 && getEntry(todayExercises[0]).name === 'Walking');
+  if (todayExercises.length === 0) {
     container.innerHTML = '<div class="card"><div class="empty-msg">Rest Day</div></div>';
   } else {
     container.innerHTML = '<div class="card"><h3>Today\'s Menu</h3>' +
-      todayExercises.map(name => {
-        const ex = menu.find(m => m.name === name);
+      todayExercises.map(item => {
+        const e = getEntry(item);
+        const ex = menu.find(m => m.name === e.name);
         const tag = ex ? (ex.type === 'weight' ? '<span class="tag tag-weight">Weight</span>' : '<span class="tag tag-cardio">Cardio</span>') : '';
-        return `<div class="menu-item"><span>${name} ${tag}</span></div>`;
+        const rxHtml = e.rx ? `<br><small style="color:var(--accent2);font-weight:600">${e.rx}</small>` : '';
+        return `<div class="menu-item"><div>${e.name} ${tag}${rxHtml}</div></div>`;
       }).join('') + '</div>';
   }
 
@@ -652,25 +695,32 @@ function renderChart() {
 // ===== SCHEDULE =====
 function renderSchedule() {
   const today = DAYS_JA[new Date().getDay()];
+  const getEntry = (item) => typeof item === 'string' ? { name: item, rx: '' } : item;
   document.getElementById('schedule-grid').innerHTML = DAYS_JA.map(day => {
     const items = schedule[day] || [];
     const isToday = day === today;
     return `
       <div class="day-card ${isToday ? 'today' : ''}">
         <h4>${day}${isToday ? ' (Today)' : ''}</h4>
-        <ul>${items.map(i => `<li>${i}</li>`).join('')}</ul>
+        <ul>${items.map(item => {
+          const e = getEntry(item);
+          const rxStr = e.rx ? ` <small style="color:var(--accent2)">${e.rx}</small>` : '';
+          return `<li>${e.name}${rxStr}</li>`;
+        }).join('')}</ul>
       </div>`;
   }).join('');
 }
 
 function openScheduleModal() {
-  const allNames = menu.map(m => m.name);
+  const getEntry = (item) => typeof item === 'string' ? { name: item, rx: '' } : item;
   document.getElementById('schedule-form').innerHTML = DAYS_JA.map(day => {
-    const current = (schedule[day] || []).join(', ');
+    const items = (schedule[day] || []).map(getEntry);
+    // format: "Name | rx" per line
+    const current = items.map(e => e.rx ? `${e.name} | ${e.rx}` : e.name).join('\n');
     return `
       <label>${day}</label>
-      <input type="text" id="sched-${day}" value="${current}"
-             placeholder="e.g. Bench Press, Running (comma separated)">`;
+      <textarea id="sched-${day}" rows="4" style="font-size:0.8rem"
+                placeholder="Exercise | sets x reps @ weight (one per line)">${current}</textarea>`;
   }).join('');
   document.getElementById('schedule-modal').classList.add('show');
 }
@@ -678,7 +728,13 @@ function openScheduleModal() {
 function saveSchedule() {
   DAYS_JA.forEach(day => {
     const val = document.getElementById('sched-' + day).value.trim();
-    schedule[day] = val ? val.split(',').map(s => s.trim()).filter(Boolean) : [];
+    if (!val) { schedule[day] = []; return; }
+    schedule[day] = val.split('\n').map(line => {
+      const trimmed = line.trim();
+      if (!trimmed) return null;
+      const parts = trimmed.split('|').map(s => s.trim());
+      return parts.length >= 2 ? { name: parts[0], rx: parts[1] } : { name: parts[0], rx: '' };
+    }).filter(Boolean);
   });
   save('schedule', schedule);
   closeModal('schedule-modal');
