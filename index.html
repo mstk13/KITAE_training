@@ -361,6 +361,14 @@ const DEFAULT_MENU = [
   { id: 21, type: 'weight', name: 'Hang Clean', target: 'Hip Extension / Power' },
   { id: 22, type: 'weight', name: 'Single Leg Hop', target: 'Unilateral Power / Balance' },
   { id: 23, type: 'weight', name: 'Calf Raise', target: 'Calves / Jump Takeoff' },
+  // === 筋連動系 瞬発力 (全身協調+爆発力) ===
+  { id: 25, type: 'weight', name: 'Med Ball Slam', target: 'Full Body Explosive / Core — 全身連動' },
+  { id: 26, type: 'weight', name: 'Med Ball Chest Pass', target: 'Upper Body Explosive — 押す瞬発力' },
+  { id: 27, type: 'weight', name: 'Kettlebell Swing', target: 'Hip Hinge Explosive / Posterior Chain' },
+  { id: 28, type: 'weight', name: 'Battle Rope', target: 'Upper Body Endurance / Explosive' },
+  { id: 29, type: 'weight', name: 'Broad Jump', target: 'Horizontal Power / Full Body' },
+  { id: 30, type: 'weight', name: 'Tuck Jump', target: 'Reactive Power / Hip Flexor Speed' },
+  { id: 31, type: 'weight', name: 'Clean & Jerk', target: 'Full Body Power / Overhead Coordination' },
   // === 有酸素 (減量) ===
   { id: 24, type: 'cardio', name: 'Walking', target: 'Fat Burn / Recovery — 20-30min' },
 ];
@@ -377,6 +385,7 @@ const DEFAULT_SCHEDULE = {
     { name: 'Calf Raise',           rx: '4x15 @ 80kg' },
     { name: 'Box Jump',             rx: '4x5 (max height)' },
     { name: 'Depth Jump',           rx: '3x5 (60cm box)' },
+    { name: 'Broad Jump',           rx: '3x5 (全力・全身連動)' },
     { name: 'Walking',              rx: '20-30min' },
   ],
   Tue: [
@@ -384,9 +393,12 @@ const DEFAULT_SCHEDULE = {
     { name: 'Incline Bench Press',  rx: '4x8 @ 70kg' },
     { name: 'Overhead Press',       rx: '4x6 @ 55kg' },
     { name: 'Dips',                 rx: '3x10 (加重 +10kg)' },
+    { name: 'Med Ball Chest Pass',  rx: '3x8 @ 5kg (全力で押す)' },
+    { name: 'Med Ball Slam',        rx: '3x10 @ 8kg (全身で叩きつけ)' },
     { name: 'Walking',              rx: '20-30min' },
   ],
   Wed: [
+    { name: 'Kettlebell Swing',     rx: '4x15 @ 24kg (軽い日の連動維持)' },
     { name: 'Walking',              rx: '20-30min' },
   ],
   Thu: [
@@ -396,6 +408,7 @@ const DEFAULT_SCHEDULE = {
     { name: 'Jump Squat',           rx: '4x5 @ 40kg' },
     { name: 'Box Jump',             rx: '4x5 (max height)' },
     { name: 'Single Leg Hop',       rx: '3x5 each' },
+    { name: 'Tuck Jump',            rx: '3x6 (膝を胸まで引き上げ)' },
     { name: 'Walking',              rx: '20-30min' },
   ],
   Fri: [
@@ -405,12 +418,15 @@ const DEFAULT_SCHEDULE = {
     { name: 'Pull-ups',             rx: '4x8 (加重 +5kg)' },
     { name: 'Hip Thrust',           rx: '4x10 @ 80kg' },
     { name: 'Lat Pulldown',         rx: '3x10 @ 55kg' },
+    { name: 'Kettlebell Swing',     rx: '4x12 @ 28kg (股関節爆発)' },
     { name: 'Walking',              rx: '20-30min' },
   ],
   Sat: [
+    { name: 'Broad Jump',           rx: '3x5 (全力・全身連動)' },
     { name: 'Walking',              rx: '20-30min' },
   ],
   Sun: [
+    { name: 'Tuck Jump',            rx: '3x5 (軽め・動き確認)' },
     { name: 'Walking',              rx: '20-30min' },
   ],
 };
