@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KITAE - Training Manager</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text-dim: #8b949e;
+  --accent: #58a6ff;
+  --accent2: #3fb950;
+  --accent3: #f0883e;
+  --danger: #f85149;
+  --radius: 8px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background: var(--bg); color: var(--text);
+  min-height: 100vh;
+}
+.app { max-width: 800px; margin: 0 auto; padding: 16px; }
+
+/* Header */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 0; border-bottom: 1px solid var(--border); margin-bottom: 16px;
+}
+header h1 { font-size: 1.5rem; }
+header h1 span { color: var(--accent); }
+
+/* Nav tabs */
+.tabs {
+  display: flex; gap: 4px; margin-bottom: 16px;
+  border-bottom: 1px solid var(--border); padding-bottom: 0;
+}
+.tab {
+  padding: 8px 16px; cursor: pointer; border: none; background: none;
+  color: var(--text-dim); font-size: 0.9rem; border-bottom: 2px solid transparent;
+  transition: color 0.2s;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* Panels */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* Cards */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
+}
+.card h3 { font-size: 1rem; margin-bottom: 8px; color: var(--accent); }
+
+/* Forms */
+label { display: block; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 4px; }
+input, select, textarea {
+  width: 100%; padding: 8px 10px; background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text); font-size: 0.9rem; margin-bottom: 10px;
+}
+input:focus, select:focus { outline: none; border-color: var(--accent); }
+button {
+  padding: 8px 16px; border: none; border-radius: var(--radius);
+  cursor: pointer; font-size: 0.9rem; transition: opacity 0.2s;
+}
+button:hover { opacity: 0.85; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-success { background: var(--accent2); color: #fff; }
+.btn-warn { background: var(--accent3); color: #fff; }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-ghost {
+  background: transparent; color: var(--text-dim); border: 1px solid var(--border);
+}
+.btn-sm { padding: 4px 10px; font-size: 0.8rem; }
+
+/* Schedule grid */
+.schedule-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+.day-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 12px; min-height: 100px;
+}
+.day-card h4 {
+  font-size: 0.85rem; color: var(--accent); margin-bottom: 6px;
+  padding-bottom: 4px; border-bottom: 1px solid var(--border);
+}
+.day-card.today { border-color: var(--accent); }
+.day-card ul { list-style: none; font-size: 0.8rem; }
+.day-card li { padding: 2px 0; color: var(--text-dim); }
+
+/* Log list */
+.log-entry {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.log-entry:last-child { border-bottom: none; }
+.log-date { font-size: 0.8rem; color: var(--text-dim); min-width: 80px; }
+.log-details { flex: 1; margin-left: 12px; }
+.log-details .exercise-name { font-weight: 600; font-size: 0.9rem; }
+.log-details .exercise-data { font-size: 0.8rem; color: var(--text-dim); }
+.tag {
+  display: inline-block; padding: 2px 8px; border-radius: 12px;
+  font-size: 0.7rem; font-weight: 600;
+}
+.tag-weight { background: #1f3a5f; color: var(--accent); }
+.tag-cardio { background: #1a3d2a; color: var(--accent2); }
+
+/* Menu items */
+.menu-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid var(--border);
+}
+.menu-item:last-child { border-bottom: none; }
+.menu-actions { display: flex; gap: 4px; }
+
+/* Chart */
+.chart-container { position: relative; height: 300px; margin-top: 12px; }
+
+/* Utility */
+.flex { display: flex; gap: 8px; align-items: center; }
+.flex-between { display: flex; justify-content: space-between; align-items: center; }
+.mt { margin-top: 12px; }
+.empty-msg { text-align: center; color: var(--text-dim); padding: 32px 0; font-size: 0.9rem; }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .schedule-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+  .tabs { overflow-x: auto; }
+  .tab { white-space: nowrap; padding: 8px 12px; font-size: 0.8rem; }
+}
+
+/* Modal */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  z-index: 100; justify-content: center; align-items: center;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; width: 90%; max-width: 500px;
+  max-height: 80vh; overflow-y: auto;
+}
+.modal h3 { margin-bottom: 12px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1><span>KITAE</span> Training</h1>
+    <div class="flex">
+      <button class="btn-ghost btn-sm" onclick="exportData()">Export</button>
+      <button class="btn-ghost btn-sm" onclick="importData()">Import</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="today">Today</button>
+    <button class="tab" data-tab="menu">Menu</button>
+    <button class="tab" data-tab="log">Log</button>
+    <button class="tab" data-tab="progress">Progress</button>
+    <button class="tab" data-tab="schedule">Schedule</button>
+  </div>
+
+  <!-- ===== TODAY ===== -->
+  <div id="today" class="panel active">
+    <div class="flex-between" style="margin-bottom:12px">
+      <h2 id="today-title" style="font-size:1.1rem"></h2>
+      <button class="btn-primary btn-sm" onclick="openLogModal()">+ Record</button>
+    </div>
+    <div id="today-menu"></div>
+    <div class="card mt">
+      <h3>Today's Log</h3>
+      <div id="today-log"></div>
+    </div>
+  </div>
+
+  <!-- ===== MENU ===== -->
+  <div id="menu" class="panel">
+    <div class="flex-between" style="margin-bottom:12px">
+      <h2 style="font-size:1.1rem">Exercise Menu</h2>
+      <button class="btn-primary btn-sm" onclick="openMenuModal()">+ Add</button>
+    </div>
+    <div class="card">
+      <h3>Weight Training</h3>
+      <div id="menu-weight"></div>
+    </div>
+    <div class="card">
+      <h3>Cardio</h3>
+      <div id="menu-cardio"></div>
+    </div>
+  </div>
+
+  <!-- ===== LOG ===== -->
+  <div id="log" class="panel">
+    <div class="flex-between" style="margin-bottom:12px">
+      <h2 style="font-size:1.1rem">Workout Log</h2>
+      <div class="flex">
+        <select id="log-filter" onchange="renderLog()" style="width:auto;margin:0">
+          <option value="all">All</option>
+          <option value="weight">Weight</option>
+          <option value="cardio">Cardio</option>
+        </select>
+      </div>
+    </div>
+    <div class="card">
+      <div id="log-list"></div>
+    </div>
+  </div>
+
+  <!-- ===== PROGRESS ===== -->
+  <div id="progress" class="panel">
+    <div class="flex-between" style="margin-bottom:12px">
+      <h2 style="font-size:1.1rem">Progress</h2>
+      <select id="progress-exercise" onchange="renderChart()" style="width:auto;margin:0"></select>
+    </div>
+    <div class="card">
+      <div class="chart-container">
+        <canvas id="progress-chart"></canvas>
+      </div>
+    </div>
+    <div class="card mt">
+      <h3>Summary</h3>
+      <div id="progress-summary"></div>
+    </div>
+  </div>
+
+  <!-- ===== SCHEDULE ===== -->
+  <div id="schedule" class="panel">
+    <div class="flex-between" style="margin-bottom:12px">
+      <h2 style="font-size:1.1rem">Weekly Schedule</h2>
+      <button class="btn-primary btn-sm" onclick="openScheduleModal()">Edit</button>
+    </div>
+    <div class="schedule-grid" id="schedule-grid"></div>
+  </div>
+</div>
+
+<!-- ===== LOG MODAL ===== -->
+<div class="modal-overlay" id="log-modal">
+  <div class="modal">
+    <h3>Record Workout</h3>
+    <label>Date</label>
+    <input type="date" id="log-date">
+    <label>Type</label>
+    <select id="log-type" onchange="updateLogForm()">
+      <option value="weight">Weight Training</option>
+      <option value="cardio">Cardio</option>
+    </select>
+    <label>Exercise</label>
+    <select id="log-exercise"></select>
+    <div id="log-fields-weight">
+      <div class="flex">
+        <div style="flex:1"><label>Weight (kg)</label><input type="number" id="log-weight" step="0.5"></div>
+        <div style="flex:1"><label>Reps</label><input type="number" id="log-reps"></div>
+        <div style="flex:1"><label>Sets</label><input type="number" id="log-sets"></div>
+      </div>
+    </div>
+    <div id="log-fields-cardio" style="display:none">
+      <div class="flex">
+        <div style="flex:1"><label>Duration (min)</label><input type="number" id="log-duration"></div>
+        <div style="flex:1"><label>Distance (km)</label><input type="number" id="log-distance" step="0.1"></div>
+      </div>
+    </div>
+    <label>Notes</label>
+    <input type="text" id="log-notes" placeholder="optional">
+    <div class="flex mt">
+      <button class="btn-success" onclick="saveLog()">Save</button>
+      <button class="btn-ghost" onclick="closeModal('log-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MENU MODAL ===== -->
+<div class="modal-overlay" id="menu-modal">
+  <div class="modal">
+    <h3 id="menu-modal-title">Add Exercise</h3>
+    <label>Type</label>
+    <select id="menu-type">
+      <option value="weight">Weight Training</option>
+      <option value="cardio">Cardio</option>
+    </select>
+    <label>Name</label>
+    <input type="text" id="menu-name" placeholder="e.g. Bench Press">
+    <label>Target / Memo</label>
+    <input type="text" id="menu-target" placeholder="e.g. Chest, Triceps">
+    <div class="flex mt">
+      <button class="btn-success" onclick="saveMenu()">Save</button>
+      <button class="btn-ghost" onclick="closeModal('menu-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCHEDULE MODAL ===== -->
+<div class="modal-overlay" id="schedule-modal">
+  <div class="modal">
+    <h3>Edit Schedule</h3>
+    <div id="schedule-form"></div>
+    <div class="flex mt">
+      <button class="btn-success" onclick="saveSchedule()">Save</button>
+      <button class="btn-ghost" onclick="closeModal('schedule-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== DATA LAYER =====
+const DAYS_JA = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+function load(key, fallback) {
+  try { return JSON.parse(localStorage.getItem('kitae_' + key)) || fallback; }
+  catch { return fallback; }
+}
+function save(key, data) { localStorage.setItem('kitae_' + key, JSON.stringify(data)); }
+
+// Default exercises
+const DEFAULT_MENU = [
+  { id: 1, type: 'weight', name: 'Bench Press', target: 'Chest / Triceps' },
+  { id: 2, type: 'weight', name: 'Squat', target: 'Legs / Glutes' },
+  { id: 3, type: 'weight', name: 'Deadlift', target: 'Back / Hamstrings' },
+  { id: 4, type: 'weight', name: 'Overhead Press', target: 'Shoulders' },
+  { id: 5, type: 'weight', name: 'Barbell Row', target: 'Back / Biceps' },
+  { id: 6, type: 'weight', name: 'Lat Pulldown', target: 'Back / Biceps' },
+  { id: 7, type: 'weight', name: 'Dumbbell Curl', target: 'Biceps' },
+  { id: 8, type: 'weight', name: 'Tricep Extension', target: 'Triceps' },
+  { id: 9, type: 'weight', name: 'Leg Press', target: 'Legs' },
+  { id: 10, type: 'weight', name: 'Calf Raise', target: 'Calves' },
+  { id: 11, type: 'cardio', name: 'Running', target: 'Endurance' },
+  { id: 12, type: 'cardio', name: 'Jump Rope', target: 'Cardio / Coordination' },
+  { id: 13, type: 'cardio', name: 'Cycling', target: 'Endurance / Legs' },
+];
+
+const DEFAULT_SCHEDULE = {
+  Mon: ['Bench Press', 'Overhead Press', 'Tricep Extension'],
+  Tue: ['Running'],
+  Wed: ['Squat', 'Deadlift', 'Leg Press', 'Calf Raise'],
+  Thu: ['Jump Rope'],
+  Fri: ['Barbell Row', 'Lat Pulldown', 'Dumbbell Curl'],
+  Sat: ['Running', 'Cycling'],
+  Sun: ['Rest'],
+};
+
+let menu = load('menu', DEFAULT_MENU);
+let logs = load('logs', []);
+let schedule = load('schedule', DEFAULT_SCHEDULE);
+let nextId = load('nextId', 100);
+
+// ===== TAB NAVIGATION =====
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+    if (tab.dataset.tab === 'progress') renderChart();
+    if (tab.dataset.tab === 'log') renderLog();
+    if (tab.dataset.tab === 'schedule') renderSchedule();
+    if (tab.dataset.tab === 'today') renderToday();
+    if (tab.dataset.tab === 'menu') renderMenu();
+  });
+});
+
+// ===== TODAY =====
+function renderToday() {
+  const now = new Date();
+  const dayName = DAYS_JA[now.getDay()];
+  const dateStr = now.toISOString().slice(0, 10);
+  document.getElementById('today-title').textContent =
+    `${dateStr} (${dayName})`;
+
+  const todayExercises = schedule[dayName] || [];
+  const container = document.getElementById('today-menu');
+  if (todayExercises.length === 0 || (todayExercises.length === 1 && todayExercises[0] === 'Rest')) {
+    container.innerHTML = '<div class="card"><div class="empty-msg">Rest Day</div></div>';
+  } else {
+    container.innerHTML = '<div class="card"><h3>Today\'s Menu</h3>' +
+      todayExercises.map(name => {
+        const ex = menu.find(m => m.name === name);
+        const tag = ex ? (ex.type === 'weight' ? '<span class="tag tag-weight">Weight</span>' : '<span class="tag tag-cardio">Cardio</span>') : '';
+        return `<div class="menu-item"><span>${name} ${tag}</span></div>`;
+      }).join('') + '</div>';
+  }
+
+  const todayLogs = logs.filter(l => l.date === dateStr);
+  const logContainer = document.getElementById('today-log');
+  if (todayLogs.length === 0) {
+    logContainer.innerHTML = '<div class="empty-msg">No records yet</div>';
+  } else {
+    logContainer.innerHTML = todayLogs.map(renderLogEntry).join('');
+  }
+}
+
+// ===== MENU =====
+function renderMenu() {
+  const weightItems = menu.filter(m => m.type === 'weight');
+  const cardioItems = menu.filter(m => m.type === 'cardio');
+
+  document.getElementById('menu-weight').innerHTML = weightItems.length === 0
+    ? '<div class="empty-msg">No exercises</div>'
+    : weightItems.map(m => `
+      <div class="menu-item">
+        <div><strong>${m.name}</strong><br><small style="color:var(--text-dim)">${m.target}</small></div>
+        <div class="menu-actions">
+          <button class="btn-danger btn-sm" onclick="deleteMenu(${m.id})">Del</button>
+        </div>
+      </div>`).join('');
+
+  document.getElementById('menu-cardio').innerHTML = cardioItems.length === 0
+    ? '<div class="empty-msg">No exercises</div>'
+    : cardioItems.map(m => `
+      <div class="menu-item">
+        <div><strong>${m.name}</strong><br><small style="color:var(--text-dim)">${m.target}</small></div>
+        <div class="menu-actions">
+          <button class="btn-danger btn-sm" onclick="deleteMenu(${m.id})">Del</button>
+        </div>
+      </div>`).join('');
+}
+
+function openMenuModal() {
+  document.getElementById('menu-modal-title').textContent = 'Add Exercise';
+  document.getElementById('menu-name').value = '';
+  document.getElementById('menu-target').value = '';
+  document.getElementById('menu-modal').classList.add('show');
+}
+
+function saveMenu() {
+  const name = document.getElementById('menu-name').value.trim();
+  const type = document.getElementById('menu-type').value;
+  const target = document.getElementById('menu-target').value.trim();
+  if (!name) return;
+  menu.push({ id: nextId++, type, name, target });
+  save('menu', menu);
+  save('nextId', nextId);
+  closeModal('menu-modal');
+  renderMenu();
+}
+
+function deleteMenu(id) {
+  menu = menu.filter(m => m.id !== id);
+  save('menu', menu);
+  renderMenu();
+}
+
+// ===== LOG =====
+function renderLogEntry(l) {
+  const tag = l.type === 'weight'
+    ? '<span class="tag tag-weight">Weight</span>'
+    : '<span class="tag tag-cardio">Cardio</span>';
+  const data = l.type === 'weight'
+    ? `${l.weight}kg x ${l.reps}reps x ${l.sets}sets`
+    : `${l.duration || '-'}min / ${l.distance || '-'}km`;
+  const notes = l.notes ? ` <small style="color:var(--text-dim)">- ${l.notes}</small>` : '';
+  return `
+    <div class="log-entry">
+      <div class="log-date">${l.date}</div>
+      <div class="log-details">
+        <div class="exercise-name">${l.exercise} ${tag}</div>
+        <div class="exercise-data">${data}${notes}</div>
+      </div>
+      <button class="btn-danger btn-sm" onclick="deleteLog('${l.id}')">Del</button>
+    </div>`;
+}
+
+function renderLog() {
+  const filter = document.getElementById('log-filter').value;
+  const filtered = filter === 'all' ? logs : logs.filter(l => l.type === filter);
+  const sorted = [...filtered].sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+  document.getElementById('log-list').innerHTML = sorted.length === 0
+    ? '<div class="empty-msg">No records</div>'
+    : sorted.map(renderLogEntry).join('');
+}
+
+function openLogModal() {
+  document.getElementById('log-date').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('log-weight').value = '';
+  document.getElementById('log-reps').value = '';
+  document.getElementById('log-sets').value = '';
+  document.getElementById('log-duration').value = '';
+  document.getElementById('log-distance').value = '';
+  document.getElementById('log-notes').value = '';
+  updateLogForm();
+  document.getElementById('log-modal').classList.add('show');
+}
+
+function updateLogForm() {
+  const type = document.getElementById('log-type').value;
+  document.getElementById('log-fields-weight').style.display = type === 'weight' ? '' : 'none';
+  document.getElementById('log-fields-cardio').style.display = type === 'cardio' ? '' : 'none';
+
+  const exercises = menu.filter(m => m.type === type);
+  document.getElementById('log-exercise').innerHTML =
+    exercises.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
+}
+
+function saveLog() {
+  const type = document.getElementById('log-type').value;
+  const entry = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    date: document.getElementById('log-date').value,
+    type,
+    exercise: document.getElementById('log-exercise').value,
+  };
+  if (type === 'weight') {
+    entry.weight = parseFloat(document.getElementById('log-weight').value) || 0;
+    entry.reps = parseInt(document.getElementById('log-reps').value) || 0;
+    entry.sets = parseInt(document.getElementById('log-sets').value) || 0;
+  } else {
+    entry.duration = parseFloat(document.getElementById('log-duration').value) || 0;
+    entry.distance = parseFloat(document.getElementById('log-distance').value) || 0;
+  }
+  entry.notes = document.getElementById('log-notes').value.trim();
+  logs.push(entry);
+  save('logs', logs);
+  closeModal('log-modal');
+  renderToday();
+  renderLog();
+}
+
+function deleteLog(id) {
+  logs = logs.filter(l => l.id !== id);
+  save('logs', logs);
+  renderLog();
+  renderToday();
+}
+
+// ===== PROGRESS =====
+let chartInstance = null;
+
+function renderChart() {
+  const select = document.getElementById('progress-exercise');
+  const exerciseNames = [...new Set(logs.map(l => l.exercise))];
+  const currentVal = select.value;
+  select.innerHTML = exerciseNames.length === 0
+    ? '<option>No data</option>'
+    : exerciseNames.map(n => `<option value="${n}">${n}</option>`).join('');
+  if (currentVal && exerciseNames.includes(currentVal)) select.value = currentVal;
+
+  const name = select.value;
+  const exLogs = logs.filter(l => l.exercise === name).sort((a, b) => a.date.localeCompare(b.date));
+  const ex = menu.find(m => m.name === name);
+  const isWeight = !ex || ex.type === 'weight';
+
+  if (chartInstance) chartInstance.destroy();
+
+  const ctx = document.getElementById('progress-chart').getContext('2d');
+
+  if (exLogs.length === 0) {
+    document.getElementById('progress-summary').innerHTML =
+      '<div class="empty-msg">Record workouts to see progress</div>';
+    return;
+  }
+
+  const labels = exLogs.map(l => l.date);
+  const datasets = isWeight
+    ? [{
+        label: 'Weight (kg)',
+        data: exLogs.map(l => l.weight),
+        borderColor: '#58a6ff', backgroundColor: 'rgba(88,166,255,0.1)',
+        tension: 0.3, fill: true,
+      }, {
+        label: 'Volume (kg x reps x sets)',
+        data: exLogs.map(l => (l.weight || 0) * (l.reps || 0) * (l.sets || 0)),
+        borderColor: '#3fb950', backgroundColor: 'rgba(63,185,80,0.1)',
+        tension: 0.3, fill: true, yAxisID: 'y1',
+      }]
+    : [{
+        label: 'Duration (min)',
+        data: exLogs.map(l => l.duration),
+        borderColor: '#3fb950', backgroundColor: 'rgba(63,185,80,0.1)',
+        tension: 0.3, fill: true,
+      }, {
+        label: 'Distance (km)',
+        data: exLogs.map(l => l.distance),
+        borderColor: '#58a6ff', backgroundColor: 'rgba(88,166,255,0.1)',
+        tension: 0.3, fill: true, yAxisID: 'y1',
+      }];
+
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#8b949e' } } },
+      scales: {
+        x: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' } },
+        y: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' }, position: 'left' },
+        y1: { ticks: { color: '#8b949e' }, grid: { display: false }, position: 'right' },
+      }
+    }
+  });
+
+  // Summary
+  if (isWeight) {
+    const maxW = Math.max(...exLogs.map(l => l.weight || 0));
+    const totalVol = exLogs.reduce((s, l) => s + (l.weight||0)*(l.reps||0)*(l.sets||0), 0);
+    document.getElementById('progress-summary').innerHTML = `
+      <div class="flex" style="gap:24px">
+        <div><small style="color:var(--text-dim)">Sessions</small><br><strong>${exLogs.length}</strong></div>
+        <div><small style="color:var(--text-dim)">Max Weight</small><br><strong>${maxW} kg</strong></div>
+        <div><small style="color:var(--text-dim)">Total Volume</small><br><strong>${totalVol.toLocaleString()} kg</strong></div>
+      </div>`;
+  } else {
+    const totalDist = exLogs.reduce((s, l) => s + (l.distance||0), 0);
+    const totalDur = exLogs.reduce((s, l) => s + (l.duration||0), 0);
+    document.getElementById('progress-summary').innerHTML = `
+      <div class="flex" style="gap:24px">
+        <div><small style="color:var(--text-dim)">Sessions</small><br><strong>${exLogs.length}</strong></div>
+        <div><small style="color:var(--text-dim)">Total Distance</small><br><strong>${totalDist.toFixed(1)} km</strong></div>
+        <div><small style="color:var(--text-dim)">Total Duration</small><br><strong>${totalDur} min</strong></div>
+      </div>`;
+  }
+}
+
+// ===== SCHEDULE =====
+function renderSchedule() {
+  const today = DAYS_JA[new Date().getDay()];
+  document.getElementById('schedule-grid').innerHTML = DAYS_JA.map(day => {
+    const items = schedule[day] || [];
+    const isToday = day === today;
+    return `
+      <div class="day-card ${isToday ? 'today' : ''}">
+        <h4>${day}${isToday ? ' (Today)' : ''}</h4>
+        <ul>${items.map(i => `<li>${i}</li>`).join('')}</ul>
+      </div>`;
+  }).join('');
+}
+
+function openScheduleModal() {
+  const allNames = menu.map(m => m.name);
+  document.getElementById('schedule-form').innerHTML = DAYS_JA.map(day => {
+    const current = (schedule[day] || []).join(', ');
+    return `
+      <label>${day}</label>
+      <input type="text" id="sched-${day}" value="${current}"
+             placeholder="e.g. Bench Press, Running (comma separated)">`;
+  }).join('');
+  document.getElementById('schedule-modal').classList.add('show');
+}
+
+function saveSchedule() {
+  DAYS_JA.forEach(day => {
+    const val = document.getElementById('sched-' + day).value.trim();
+    schedule[day] = val ? val.split(',').map(s => s.trim()).filter(Boolean) : [];
+  });
+  save('schedule', schedule);
+  closeModal('schedule-modal');
+  renderSchedule();
+  renderToday();
+}
+
+// ===== MODALS =====
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('show'); });
+});
+
+// ===== EXPORT / IMPORT =====
+function exportData() {
+  const data = { menu, logs, schedule, nextId, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `kitae_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (data.menu) { menu = data.menu; save('menu', menu); }
+        if (data.logs) { logs = data.logs; save('logs', logs); }
+        if (data.schedule) { schedule = data.schedule; save('schedule', schedule); }
+        if (data.nextId) { nextId = data.nextId; save('nextId', nextId); }
+        renderToday(); renderMenu(); renderLog(); renderSchedule();
+        alert('Import complete!');
+      } catch { alert('Invalid file'); }
+    };
+    reader.readAsText(e.target.files[0]);
+  };
+  input.click();
+}
+
+// ===== INIT =====
+renderToday();
+renderMenu();
+</script>
+</body>
+</html>
