@@ -2,6 +2,8 @@
 
 **筋力向上 + 爆発力(垂直飛び110cm) + 減量** を同時に追求するトレーニング管理アプリ。
 
+**アプリを開く → https://mstk13.github.io/KITAE_training/**
+
 ## Current Records
 
 | Lift | Weight |
