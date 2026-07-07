@@ -171,7 +171,18 @@ button:hover { opacity: 0.85; }
 
   <!-- ===== TODAY ===== -->
   <div id="today" class="panel active">
-    <div class="flex-between" style="margin-bottom:12px">
+    <div class="card" style="border-color:#f0883e">
+      <h3 style="color:#f0883e">Goals</h3>
+      <div class="flex" style="gap:16px;flex-wrap:wrap;font-size:0.85rem">
+        <div><small style="color:var(--text-dim)">Bench</small><br>105kg <span style="color:var(--accent)">→ ?</span></div>
+        <div><small style="color:var(--text-dim)">Squat</small><br>140kg <span style="color:var(--accent)">→ ?</span></div>
+        <div><small style="color:var(--text-dim)">Deadlift</small><br>130kg <span style="color:var(--accent)">→ ?</span></div>
+        <div><small style="color:var(--text-dim)">Snatch</small><br>60kg <span style="color:var(--accent)">→ ?</span></div>
+        <div><small style="color:var(--text-dim)">Vertical</small><br><span style="color:var(--accent)">110cm</span></div>
+        <div><small style="color:var(--text-dim)">Cardio</small><br>Walk 20-30min/day</div>
+      </div>
+    </div>
+    <div class="flex-between" style="margin:12px 0">
       <h2 id="today-title" style="font-size:1.1rem"></h2>
       <button class="btn-primary btn-sm" onclick="openLogModal()">+ Record</button>
     </div>
@@ -319,31 +330,52 @@ function load(key, fallback) {
 }
 function save(key, data) { localStorage.setItem('kitae_' + key, JSON.stringify(data)); }
 
-// Default exercises
+// Default exercises — 筋力向上 + 爆発力(垂直飛び110cm) + 減量
+// 現状: Bench 105kg / Squat 140kg / Deadlift 130kg / Snatch 60kg
 const DEFAULT_MENU = [
-  { id: 1, type: 'weight', name: 'Bench Press', target: 'Chest / Triceps' },
-  { id: 2, type: 'weight', name: 'Squat', target: 'Legs / Glutes' },
-  { id: 3, type: 'weight', name: 'Deadlift', target: 'Back / Hamstrings' },
-  { id: 4, type: 'weight', name: 'Overhead Press', target: 'Shoulders' },
-  { id: 5, type: 'weight', name: 'Barbell Row', target: 'Back / Biceps' },
-  { id: 6, type: 'weight', name: 'Lat Pulldown', target: 'Back / Biceps' },
-  { id: 7, type: 'weight', name: 'Dumbbell Curl', target: 'Biceps' },
-  { id: 8, type: 'weight', name: 'Tricep Extension', target: 'Triceps' },
-  { id: 9, type: 'weight', name: 'Leg Press', target: 'Legs' },
-  { id: 10, type: 'weight', name: 'Calf Raise', target: 'Calves' },
-  { id: 11, type: 'cardio', name: 'Running', target: 'Endurance' },
-  { id: 12, type: 'cardio', name: 'Jump Rope', target: 'Cardio / Coordination' },
-  { id: 13, type: 'cardio', name: 'Cycling', target: 'Endurance / Legs' },
+  // === 筋力メイン種目 (BIG3 + Snatch) ===
+  { id: 1, type: 'weight', name: 'Bench Press', target: 'Chest / Triceps — 現状105kg' },
+  { id: 2, type: 'weight', name: 'Squat', target: 'Legs / Glutes — 現状140kg' },
+  { id: 3, type: 'weight', name: 'Deadlift', target: 'Back / Hamstrings — 現状130kg' },
+  { id: 4, type: 'weight', name: 'Snatch', target: 'Full Body / Power — 現状60kg' },
+  // === 補助種目 (ベンチ系) ===
+  { id: 5, type: 'weight', name: 'Incline Bench Press', target: 'Upper Chest / Shoulders' },
+  { id: 6, type: 'weight', name: 'Dumbbell Bench Press', target: 'Chest / Stabilizer' },
+  { id: 7, type: 'weight', name: 'Overhead Press', target: 'Shoulders / Triceps' },
+  { id: 8, type: 'weight', name: 'Dips', target: 'Chest / Triceps' },
+  // === 補助種目 (スクワット/デッドリフト系) ===
+  { id: 9, type: 'weight', name: 'Front Squat', target: 'Quads / Core' },
+  { id: 10, type: 'weight', name: 'Romanian Deadlift', target: 'Hamstrings / Glutes' },
+  { id: 11, type: 'weight', name: 'Bulgarian Split Squat', target: 'Legs / Balance' },
+  { id: 12, type: 'weight', name: 'Hip Thrust', target: 'Glutes / Hip Extension' },
+  { id: 13, type: 'weight', name: 'Leg Press', target: 'Legs' },
+  // === 補助種目 (背中/腕) ===
+  { id: 14, type: 'weight', name: 'Barbell Row', target: 'Back / Biceps' },
+  { id: 15, type: 'weight', name: 'Lat Pulldown', target: 'Back / Biceps' },
+  { id: 16, type: 'weight', name: 'Pull-ups', target: 'Back / Biceps / Core' },
+  // === 爆発力 / プライオメトリクス (垂直飛び110cm) ===
+  { id: 17, type: 'weight', name: 'Power Clean', target: 'Explosive Power / Full Body' },
+  { id: 18, type: 'weight', name: 'Box Jump', target: 'Explosive Legs / Vertical Jump' },
+  { id: 19, type: 'weight', name: 'Depth Jump', target: 'Reactive Strength / Plyometrics' },
+  { id: 20, type: 'weight', name: 'Jump Squat', target: 'Explosive Legs / Power' },
+  { id: 21, type: 'weight', name: 'Hang Clean', target: 'Hip Extension / Power' },
+  { id: 22, type: 'weight', name: 'Single Leg Hop', target: 'Unilateral Power / Balance' },
+  { id: 23, type: 'weight', name: 'Calf Raise', target: 'Calves / Jump Takeoff' },
+  // === 有酸素 (減量) ===
+  { id: 24, type: 'cardio', name: 'Walking', target: 'Fat Burn / Recovery — 20-30min' },
 ];
 
+// 週間スケジュール: 週4回トレーニング + 有酸素(ウォーキング)毎日
+// Day1: 下半身筋力+爆発力  Day2: 上半身(押す)+補助
+// Day3: 爆発力+スナッチ    Day4: 上半身(引く)+下半身補助
 const DEFAULT_SCHEDULE = {
-  Mon: ['Bench Press', 'Overhead Press', 'Tricep Extension'],
-  Tue: ['Running'],
-  Wed: ['Squat', 'Deadlift', 'Leg Press', 'Calf Raise'],
-  Thu: ['Jump Rope'],
-  Fri: ['Barbell Row', 'Lat Pulldown', 'Dumbbell Curl'],
-  Sat: ['Running', 'Cycling'],
-  Sun: ['Rest'],
+  Mon: ['Squat', 'Front Squat', 'Bulgarian Split Squat', 'Calf Raise', 'Box Jump', 'Depth Jump', 'Walking'],
+  Tue: ['Bench Press', 'Incline Bench Press', 'Overhead Press', 'Dips', 'Walking'],
+  Wed: ['Walking'],
+  Thu: ['Power Clean', 'Snatch', 'Hang Clean', 'Jump Squat', 'Box Jump', 'Single Leg Hop', 'Walking'],
+  Fri: ['Deadlift', 'Romanian Deadlift', 'Barbell Row', 'Pull-ups', 'Hip Thrust', 'Lat Pulldown', 'Walking'],
+  Sat: ['Walking'],
+  Sun: ['Walking'],
 };
 
 let menu = load('menu', DEFAULT_MENU);
