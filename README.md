@@ -17,19 +17,21 @@
 
 - BIG3 + Snatch の重量向上
 - 垂直飛び 110cm
-- 減量(毎日ウォーキング 20-30min)
+- **減量 (7/16〜8/31)**: 89kg/27% → 83-84kg/22-23% — [食事管理プラン](diet_plan.md)
 
-## Weekly Schedule
+## Weekly Schedule (減量期: 7/16〜8/31)
 
 | Day | Theme | Key Exercises |
 |-----|-------|---------------|
-| **Mon** | 下半身筋力 + 爆発力 | Squat 5x5@120kg, Front Squat, Box Jump, Depth Jump, Broad Jump |
-| **Tue** | 上半身(押す) | Bench 5x5@90kg, Incline, OHP, Dips, Med Ball Slam/Chest Pass |
-| **Wed** | 休息 + 連動維持 | Kettlebell Swing, Walking |
-| **Thu** | 爆発力 + スナッチ | Power Clean, Snatch 5x3@50kg, Hang Clean, Jump Squat, Tuck Jump |
-| **Fri** | 上半身(引く) + 下半身補助 | Deadlift 5x5@110kg, RDL, Row, Pull-ups, KB Swing |
-| **Sat** | 休息 + 連動 | Broad Jump, Walking |
-| **Sun** | 休息 + 連動 | Tuck Jump, Walking |
+| **Mon** | 胸 + 三頭 | Bench 5x5, Incline DB, Dips |
+| **Tue** | 背中 + 二頭 | Deadlift 5x5, Lat Pull, Row |
+| **Wed** | 脚 | Squat 5x5, Leg Press, RDL |
+| **Thu** | 肩 + 腹 | OHP, Side Raise, Hanging Leg Raise |
+| **Fri** | 胸 + 背中 (Vol軽め) | Bench 3x8, Row 3x8, Pull-ups |
+| **Sat** | 脚 or 弱点部位 | Front Squat, Bulgarian Split Squat |
+| **Sun** | **完全休養** | — |
+
+**毎回最後に傾斜MAXウォーク 25-30min** (心拍130-140目安)
 
 ## Features
 
