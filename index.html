@@ -140,6 +140,17 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
   color:var(--text-dim);cursor:pointer;font-size:0.7rem;padding:2px 4px;
 }
 .menu-card .mc-del:hover{color:var(--red)}
+.mc-video{
+  display:inline-flex;align-items:center;gap:3px;margin-top:4px;padding:3px 8px;
+  background:rgba(255,0,0,0.12);border:1px solid rgba(255,0,0,0.25);border-radius:6px;
+  color:#f55;font-size:0.65rem;font-weight:600;cursor:pointer;text-decoration:none;
+}
+.mc-video:hover{background:rgba(255,0,0,0.2)}
+.ex-video{
+  padding:4px 8px;border:none;border-radius:6px;background:rgba(255,0,0,0.12);
+  color:#f55;font-size:0.65rem;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;
+}
+.ex-video:hover{background:rgba(255,0,0,0.2)}
 
 /* Modal */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;align-items:flex-end;justify-content:center}
@@ -377,30 +388,30 @@ function save(k,d){localStorage.setItem('kitae_'+k,JSON.stringify(d))}
 
 const DEFAULT_MENU = [
   // Weight Training
-  {id:1,type:'weight',name:'バックスクワット',target:'Legs / Glutes'},
-  {id:2,type:'weight',name:'ベンチプレス',target:'Chest / Triceps'},
-  {id:3,type:'weight',name:'デッドリフト',target:'Back / Hamstrings'},
-  {id:4,type:'weight',name:'ヒップスラスト',target:'Glutes / Hip Extension'},
-  {id:5,type:'weight',name:'RDL',target:'Hamstrings / Glutes'},
-  {id:6,type:'weight',name:'ワンハンドロー',target:'Back / Biceps'},
-  {id:7,type:'weight',name:'グルートブリッジ(バンド)',target:'Glutes'},
-  {id:8,type:'weight',name:'ステップアップ',target:'Legs / Balance'},
-  {id:9,type:'weight',name:'レッグカール',target:'Hamstrings'},
-  {id:10,type:'weight',name:'ダンベルショルダープレス',target:'Shoulders'},
-  {id:11,type:'weight',name:'ラットプルダウン',target:'Back / Biceps'},
-  {id:12,type:'weight',name:'プッシュプレス',target:'Shoulders / Triceps'},
-  {id:13,type:'weight',name:'ファーマーズキャリー',target:'Grip / Core'},
-  {id:14,type:'weight',name:'アブローラー',target:'Core'},
-  {id:15,type:'weight',name:'サイドプランク',target:'Core / Stability'},
-  {id:16,type:'weight',name:'ダンベルサイドベンド',target:'Obliques'},
-  {id:17,type:'weight',name:'パロフプレス',target:'Core / Anti-rotation'},
+  {id:1,type:'weight',name:'バックスクワット',target:'Legs / Glutes',video:'https://www.youtube.com/results?search_query=バックスクワット+正しいフォーム'},
+  {id:2,type:'weight',name:'ベンチプレス',target:'Chest / Triceps',video:'https://www.youtube.com/results?search_query=ベンチプレス+正しいフォーム'},
+  {id:3,type:'weight',name:'デッドリフト',target:'Back / Hamstrings',video:'https://www.youtube.com/results?search_query=デッドリフト+正しいフォーム'},
+  {id:4,type:'weight',name:'ヒップスラスト',target:'Glutes / Hip Extension',video:'https://www.youtube.com/results?search_query=ヒップスラスト+バーベル+フォーム'},
+  {id:5,type:'weight',name:'RDL',target:'Hamstrings / Glutes',video:'https://www.youtube.com/results?search_query=ルーマニアンデッドリフト+フォーム'},
+  {id:6,type:'weight',name:'ワンハンドロー',target:'Back / Biceps',video:'https://www.youtube.com/results?search_query=ワンハンドダンベルロー+フォーム'},
+  {id:7,type:'weight',name:'グルートブリッジ(バンド)',target:'Glutes',video:'https://www.youtube.com/results?search_query=グルートブリッジ+バンド+やり方'},
+  {id:8,type:'weight',name:'ステップアップ',target:'Legs / Balance',video:'https://www.youtube.com/results?search_query=ダンベル+ステップアップ+フォーム'},
+  {id:9,type:'weight',name:'レッグカール',target:'Hamstrings',video:'https://www.youtube.com/results?search_query=レッグカール+マシン+フォーム'},
+  {id:10,type:'weight',name:'ダンベルショルダープレス',target:'Shoulders',video:'https://www.youtube.com/results?search_query=ダンベルショルダープレス+フォーム'},
+  {id:11,type:'weight',name:'ラットプルダウン',target:'Back / Biceps',video:'https://www.youtube.com/results?search_query=ラットプルダウン+正しいフォーム'},
+  {id:12,type:'weight',name:'プッシュプレス',target:'Shoulders / Triceps',video:'https://www.youtube.com/results?search_query=プッシュプレス+バーベル+フォーム'},
+  {id:13,type:'weight',name:'ファーマーズキャリー',target:'Grip / Core',video:'https://www.youtube.com/results?search_query=ファーマーズウォーク+やり方'},
+  {id:14,type:'weight',name:'アブローラー',target:'Core',video:'https://www.youtube.com/results?search_query=アブローラー+膝コロ+正しいフォーム'},
+  {id:15,type:'weight',name:'サイドプランク',target:'Core / Stability',video:'https://www.youtube.com/results?search_query=サイドプランク+正しいフォーム'},
+  {id:16,type:'weight',name:'ダンベルサイドベンド',target:'Obliques',video:'https://www.youtube.com/results?search_query=ダンベルサイドベンド+フォーム'},
+  {id:17,type:'weight',name:'パロフプレス',target:'Core / Anti-rotation',video:'https://www.youtube.com/results?search_query=パロフプレス+ケーブル+やり方'},
   // Plyometrics / Power
-  {id:18,type:'plyo',name:'スナッチ',target:'Full Body / Power'},
-  {id:19,type:'plyo',name:'KB/ダンベルスイング',target:'Hip Hinge Explosive'},
-  {id:20,type:'plyo',name:'自重ジャンプスクワット',target:'Explosive Legs'},
-  {id:21,type:'plyo',name:'軽ダンベルスイング',target:'Hip Hinge / Light'},
+  {id:18,type:'plyo',name:'スナッチ',target:'Full Body / Power',video:'https://www.youtube.com/results?search_query=スナッチ+ウエイトリフティング+フォーム'},
+  {id:19,type:'plyo',name:'KB/ダンベルスイング',target:'Hip Hinge Explosive',video:'https://www.youtube.com/results?search_query=ケトルベルスイング+正しいフォーム'},
+  {id:20,type:'plyo',name:'自重ジャンプスクワット',target:'Explosive Legs',video:'https://www.youtube.com/results?search_query=ジャンプスクワット+自重+フォーム'},
+  {id:21,type:'plyo',name:'軽ダンベルスイング',target:'Hip Hinge / Light',video:'https://www.youtube.com/results?search_query=ダンベルスイング+軽量+フォーム'},
   // Cardio
-  {id:22,type:'cardio',name:'傾斜ウォーキング',target:'Fat Burn / Recovery'},
+  {id:22,type:'cardio',name:'傾斜ウォーキング',target:'Fat Burn / Recovery',video:'https://www.youtube.com/results?search_query=トレッドミル+傾斜ウォーキング+脂肪燃焼'},
 ];
 
 const DEFAULT_SCHEDULE = {
@@ -467,6 +478,7 @@ let todayChecked = load('todayChecked_' + new Date().toISOString().slice(0,10), 
 let bodyWeights = load('bodyWeights', []);
 
 function getEntry(item){return typeof item==='string'?{name:item,rx:''}:item}
+function getVideo(name){const m=menu.find(x=>x.name===name);return m&&m.video?m.video:''}
 function getTag(name){
   const m=menu.find(x=>x.name===name);
   if(!m) return '';
@@ -500,12 +512,14 @@ function renderToday(){
   if(!items.length){c.innerHTML='<div class="card"><div class="empty">Rest Day</div></div>';return}
   c.innerHTML='<div class="card">'+items.map((item,i)=>{
     const e=getEntry(item), done=todayChecked.includes(i);
+    const vid=getVideo(e.name);
     return `<div class="ex-row">
       <button class="ex-check ${done?'done':''}" onclick="toggleCheck(${i})">${done?'&#10003;':''}</button>
       <div class="ex-info">
         <div class="ex-name ${done?'done-text':''}">${e.name} ${getTag(e.name)}</div>
         ${e.rx?`<div class="ex-rx">${e.rx}</div>`:''}
       </div>
+      ${vid?`<a class="ex-video" href="${vid}" target="_blank">&#9654;</a>`:''}
       <button class="ex-rec" onclick="quickLog('${e.name.replace(/'/g,"\\'")}')">REC</button>
     </div>`;
   }).join('')+'</div>';
@@ -619,6 +633,7 @@ function renderMenu(){
       <div class="menu-card">
         <div class="mc-name">${m.name}</div>
         <div class="mc-target">${m.target}</div>
+        ${m.video?`<a class="mc-video" href="${m.video}" target="_blank" onclick="event.stopPropagation()">&#9654; Video</a>`:''}
         <button class="mc-del" onclick="deleteMenu(${m.id})">&#x2715;</button>
       </div>`).join(''):'<div class="empty" style="grid-column:1/-1">No exercises</div>';
   });
@@ -778,7 +793,8 @@ function renderSchedule(){
       <div class="sched-day-head ${day===today?'is-today':''}">${DAYS_LABEL[day]}${day===today?' — Today':''}</div>
       <div class="sched-day-body">${items.length?items.map(item=>{
         const e=getEntry(item);
-        return `<div class="sched-row"><span>${e.name} ${getTag(e.name)}</span><span class="sched-rx">${e.rx||''}</span></div>`;
+        const sv=getVideo(e.name);
+        return `<div class="sched-row"><span>${e.name} ${getTag(e.name)}${sv?` <a class="ex-video" href="${sv}" target="_blank" style="padding:2px 5px">&#9654;</a>`:''}</span><span class="sched-rx">${e.rx||''}</span></div>`;
       }).join(''):'<div class="sched-row" style="color:var(--text-dim)">Rest</div>'}</div>
     </div>`;
   }).join('');
