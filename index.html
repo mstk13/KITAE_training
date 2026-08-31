@@ -162,6 +162,30 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
 .empty{text-align:center;color:var(--text-dim);padding:24px;font-size:0.85rem}
 
 .panel{display:none}.panel.active{display:block}
+
+/* Body weight input */
+.bw-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.bw-row input{width:100px;margin:0}
+.bw-today{font-size:0.85rem;color:var(--green);font-weight:600}
+.bw-avg{font-size:0.75rem;color:var(--text-dim);margin-top:6px}
+.bw-history{display:flex;gap:4px;margin-top:10px;overflow-x:auto}
+.bw-day{text-align:center;min-width:46px;padding:6px 4px;background:var(--surface2);border-radius:8px}
+.bw-day .bwd-date{font-size:0.6rem;color:var(--text-dim)}
+.bw-day .bwd-val{font-size:0.8rem;font-weight:700;margin-top:2px}
+.bw-day .bwd-diff{font-size:0.6rem}
+.bw-day .bwd-diff.down{color:var(--green)}
+.bw-day .bwd-diff.up{color:var(--red)}
+
+/* Weekly tracker */
+.tracker-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.tracker-day{padding:8px 2px;background:var(--surface2);border-radius:8px;min-width:0}
+.tracker-day.is-today{border:2px solid var(--accent)}
+.tracker-day.complete{background:rgba(63,185,80,0.15)}
+.tracker-day.partial{background:rgba(240,136,62,0.1)}
+.tracker-day.missed{background:rgba(248,81,73,0.08)}
+.tracker-day .td-label{font-size:0.6rem;color:var(--text-dim)}
+.tracker-day .td-icon{font-size:1rem;margin-top:2px}
+.tracker-day .td-count{font-size:0.6rem;color:var(--text-dim);margin-top:1px}
 </style>
 </head>
 <body>
@@ -179,14 +203,32 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
     <div class="card card-glow">
       <div class="card-title" style="color:var(--orange)">Target Records</div>
       <div class="goals">
-        <div class="goal-item"><div class="val">105<small>kg</small></div><div class="lbl">Bench</div></div>
-        <div class="goal-item"><div class="val">140<small>kg</small></div><div class="lbl">Squat</div></div>
-        <div class="goal-item"><div class="val">130<small>kg</small></div><div class="lbl">Deadlift</div></div>
+        <div class="goal-item"><div class="val">130<small>kg</small></div><div class="lbl">Squat</div></div>
+        <div class="goal-item"><div class="val">100<small>kg</small></div><div class="lbl">Bench</div></div>
+        <div class="goal-item"><div class="val">120<small>kg</small></div><div class="lbl">Deadlift</div></div>
         <div class="goal-item"><div class="val">60<small>kg</small></div><div class="lbl">Snatch</div></div>
-        <div class="goal-item"><div class="val" style="color:var(--purple)">110<small>cm</small></div><div class="lbl">Vertical</div></div>
+        <div class="goal-item"><div class="val" style="color:var(--purple)">82<small>kg</small></div><div class="lbl">Target BW</div></div>
         <div class="goal-item"><div class="val" style="color:var(--green)">30<small>min</small></div><div class="lbl">Walk/day</div></div>
       </div>
     </div>
+    <!-- Body Weight -->
+    <div class="card">
+      <div class="card-title">Body Weight</div>
+      <div class="bw-row">
+        <input type="number" id="bw-input" step="0.1" placeholder="kg" inputmode="decimal">
+        <button class="btn btn-g btn-sm" onclick="saveBodyWeight()">Record</button>
+        <span class="bw-today" id="bw-today-display"></span>
+      </div>
+      <div class="bw-avg" id="bw-avg-display"></div>
+      <div class="bw-history" id="bw-history"></div>
+    </div>
+
+    <!-- Weekly Tracker -->
+    <div class="card">
+      <div class="card-title">Weekly Completion</div>
+      <div class="tracker-grid" id="weekly-tracker"></div>
+    </div>
+
     <div class="section"><span id="today-title"></span></div>
     <div id="today-menu"></div>
     <div class="section" style="margin-top:20px">Today's Log</div>
@@ -334,97 +376,86 @@ function load(k,fb){try{return JSON.parse(localStorage.getItem('kitae_'+k))||fb}
 function save(k,d){localStorage.setItem('kitae_'+k,JSON.stringify(d))}
 
 const DEFAULT_MENU = [
-  {id:1,type:'weight',name:'Bench Press',target:'Chest / Triceps'},
-  {id:2,type:'weight',name:'Squat',target:'Legs / Glutes'},
-  {id:3,type:'weight',name:'Deadlift',target:'Back / Hamstrings'},
-  {id:4,type:'weight',name:'Snatch',target:'Full Body / Power'},
-  {id:5,type:'weight',name:'Incline Bench Press',target:'Upper Chest / Shoulders'},
-  {id:6,type:'weight',name:'Dumbbell Bench Press',target:'Chest / Stabilizer'},
-  {id:7,type:'weight',name:'Overhead Press',target:'Shoulders / Triceps'},
-  {id:8,type:'weight',name:'Dips',target:'Chest / Triceps'},
-  {id:9,type:'weight',name:'Front Squat',target:'Quads / Core'},
-  {id:10,type:'weight',name:'Romanian Deadlift',target:'Hamstrings / Glutes'},
-  {id:11,type:'weight',name:'Bulgarian Split Squat',target:'Legs / Balance'},
-  {id:12,type:'weight',name:'Hip Thrust',target:'Glutes / Hip Extension'},
-  {id:13,type:'weight',name:'Leg Press',target:'Legs'},
-  {id:14,type:'weight',name:'Barbell Row',target:'Back / Biceps'},
-  {id:15,type:'weight',name:'Lat Pulldown',target:'Back / Biceps'},
-  {id:16,type:'weight',name:'Pull-ups',target:'Back / Biceps / Core'},
-  {id:17,type:'weight',name:'Calf Raise',target:'Calves / Jump Takeoff'},
-  {id:32,type:'weight',name:'Single Leg RDL',target:'Hamstrings / Glutes / Balance'},
-  {id:18,type:'plyo',name:'Power Clean',target:'Explosive / Full Body'},
-  {id:19,type:'plyo',name:'Box Jump',target:'Explosive Legs / Vertical'},
-  {id:20,type:'plyo',name:'Depth Jump',target:'Reactive Strength'},
-  {id:21,type:'plyo',name:'Jump Squat',target:'Explosive Legs / Power'},
-  {id:22,type:'plyo',name:'Hang Clean',target:'Hip Extension / Power'},
-  {id:23,type:'plyo',name:'Single Leg Hop',target:'Unilateral Power'},
-  {id:25,type:'plyo',name:'Med Ball Slam',target:'Full Body Explosive'},
-  {id:26,type:'plyo',name:'Med Ball Chest Pass',target:'Upper Body Explosive'},
-  {id:27,type:'plyo',name:'Kettlebell Swing',target:'Hip Hinge Explosive'},
-  {id:29,type:'plyo',name:'Broad Jump',target:'Horizontal Power'},
-  {id:30,type:'plyo',name:'Tuck Jump',target:'Reactive Power'},
-  {id:31,type:'plyo',name:'Clean & Jerk',target:'Full Body / Overhead'},
-  {id:33,type:'plyo',name:'Lateral Bound',target:'Lateral Power / Unilateral'},
-  {id:34,type:'plyo',name:'Lateral Box Push-off',target:'Lateral Explosive / Unilateral'},
-  {id:35,type:'plyo',name:'Single Leg Broad Jump',target:'Unilateral Horizontal Power'},
-  {id:24,type:'cardio',name:'Walking',target:'Fat Burn / Recovery'},
+  // Weight Training
+  {id:1,type:'weight',name:'バックスクワット',target:'Legs / Glutes'},
+  {id:2,type:'weight',name:'ベンチプレス',target:'Chest / Triceps'},
+  {id:3,type:'weight',name:'デッドリフト',target:'Back / Hamstrings'},
+  {id:4,type:'weight',name:'ヒップスラスト',target:'Glutes / Hip Extension'},
+  {id:5,type:'weight',name:'RDL',target:'Hamstrings / Glutes'},
+  {id:6,type:'weight',name:'ワンハンドロー',target:'Back / Biceps'},
+  {id:7,type:'weight',name:'グルートブリッジ(バンド)',target:'Glutes'},
+  {id:8,type:'weight',name:'ステップアップ',target:'Legs / Balance'},
+  {id:9,type:'weight',name:'レッグカール',target:'Hamstrings'},
+  {id:10,type:'weight',name:'ダンベルショルダープレス',target:'Shoulders'},
+  {id:11,type:'weight',name:'ラットプルダウン',target:'Back / Biceps'},
+  {id:12,type:'weight',name:'プッシュプレス',target:'Shoulders / Triceps'},
+  {id:13,type:'weight',name:'ファーマーズキャリー',target:'Grip / Core'},
+  {id:14,type:'weight',name:'アブローラー',target:'Core'},
+  {id:15,type:'weight',name:'サイドプランク',target:'Core / Stability'},
+  {id:16,type:'weight',name:'ダンベルサイドベンド',target:'Obliques'},
+  {id:17,type:'weight',name:'パロフプレス',target:'Core / Anti-rotation'},
+  // Plyometrics / Power
+  {id:18,type:'plyo',name:'スナッチ',target:'Full Body / Power'},
+  {id:19,type:'plyo',name:'KB/ダンベルスイング',target:'Hip Hinge Explosive'},
+  {id:20,type:'plyo',name:'自重ジャンプスクワット',target:'Explosive Legs'},
+  {id:21,type:'plyo',name:'軽ダンベルスイング',target:'Hip Hinge / Light'},
+  // Cardio
+  {id:22,type:'cardio',name:'傾斜ウォーキング',target:'Fat Burn / Recovery'},
 ];
 
 const DEFAULT_SCHEDULE = {
-  Mon:[
-    {name:'Squat',rx:'5x5 @ 120kg (85%)'},
-    {name:'Single Leg RDL',rx:'3x8 each @ 20-24kg DB'},
-    {name:'Bulgarian Split Squat',rx:'3x8 each @ 30kg DB'},
-    {name:'Calf Raise',rx:'3x15 @ 80kg'},
-    {name:'Box Jump',rx:'3x5 (max height)'},
-    {name:'Walking',rx:'35min (傾斜 HR130-140)'},
+  Mon:[ // C': 軽スナッチ・スピード+可動域日(約35分)
+    {name:'可動域ドリル',rx:'12min (90/90・WGS・カウチ・ATGスクワット・OHスクワット・胸椎オープンブック)'},
+    {name:'スナッチ',rx:'5×2 @ 30-36kg (50-60%) テクニック重視'},
+    {name:'軽ダンベルスイング',rx:'3×10 @ 12-16kg'},
+    {name:'傾斜ウォーキング',rx:'20-30min (傾斜15% / 4.5-5.5km/h)'},
   ],
-  Tue:[
-    {name:'Bench Press',rx:'5x5 @ 90kg (85%)'},
-    {name:'Incline Bench Press',rx:'3x8 @ 70kg'},
-    {name:'Overhead Press',rx:'3x6 @ 55kg'},
-    {name:'Dips',rx:'3x10 (加重 +10kg)'},
-    {name:'Med Ball Slam',rx:'3x10 (全身で叩きつけ)'},
-    {name:'Walking',rx:'35min (傾斜 HR130-140)'},
+  Tue:[ // A: 下半身(尻・ハム)
+    {name:'バックスクワット',rx:'4×5 @ 105-110kg ※105kg全通し→翌週110kg'},
+    {name:'ヒップスラスト',rx:'4×8 @ 60kg(調整可)'},
+    {name:'RDL',rx:'3×8 @ 70-80kg'},
+    {name:'KB/ダンベルスイング',rx:'3×12 @ 16-24kg (瞬発フィニッシャー)'},
+    {name:'傾斜ウォーキング',rx:'20-30min (傾斜15% / 4.5-5.5km/h)'},
   ],
-  Wed:[
-    {name:'Lateral Bound',rx:'3x5 each (横方向・最大出力→片足着地)'},
-    {name:'Single Leg Hop',rx:'3x5 each (前方・片足着地)'},
-    {name:'Lateral Box Push-off',rx:'3x5 each (横方向に爆発的に押し出す)'},
-    {name:'Single Leg Broad Jump',rx:'3x3 each (片足踏切→前方最大距離)'},
-    {name:'Hip Mobility',rx:'15-20min (90/90・WGS・ピジョン・フロッグ等)'},
-    {name:'Walking',rx:'40min (傾斜 HR130-140)'},
+  Wed:[ // D: 上半身+体幹
+    {name:'ベンチプレス',rx:'4×5 @ 85kg (好調日のみ87.5kg)'},
+    {name:'ワンハンドロー',rx:'3×10 @ 30kg前後'},
+    {name:'アブローラー',rx:'3×8-12 (膝コロ)'},
+    {name:'サイドプランク',rx:'各60秒×2'},
+    {name:'自重ジャンプスクワット',rx:'2×5 (瞬発フィニッシャー)'},
+    {name:'傾斜ウォーキング',rx:'20-30min (傾斜15% / 4.5-5.5km/h)'},
   ],
-  Thu:[
-    {name:'Power Clean',rx:'5x3 @ 70kg'},
-    {name:'Snatch',rx:'5x3 @ 50kg (83%)'},
-    {name:'Hang Clean',rx:'3x3 @ 65kg'},
-    {name:'Jump Squat',rx:'3x5 @ 40kg'},
-    {name:'Depth Jump',rx:'3x5 (60cm box)'},
-    {name:'Tuck Jump',rx:'3x6 (膝を胸まで引き上げ)'},
-    {name:'Walking',rx:'35min (傾斜 HR130-140)'},
+  Thu:[ // C: スナッチ+パワー
+    {name:'スナッチ',rx:'1×3-4本 @ 50kg (83%) → 好調日のみ55-60kg 1-2本'},
+    {name:'スナッチ',rx:'4×2 @ 42.5-48kg (70-80%) バックオフ・速度最優先'},
+    {name:'プッシュプレス',rx:'3×5 @ 50-55kg'},
+    {name:'ファーマーズキャリー',rx:'3×30m (重めDB×2)'},
+    {name:'軽ダンベルスイング',rx:'2×8 @ 12-16kg (瞬発フィニッシャー)'},
+    {name:'傾斜ウォーキング',rx:'20-30min (傾斜15% / 4.5-5.5km/h)'},
   ],
-  Fri:[
-    {name:'Deadlift',rx:'5x5 @ 110kg (85%)'},
-    {name:'Romanian Deadlift',rx:'3x8 @ 80kg'},
-    {name:'Barbell Row',rx:'3x8 @ 70kg'},
-    {name:'Pull-ups',rx:'3x8 (加重 +5kg)'},
-    {name:'Hip Thrust',rx:'3x10 @ 80kg'},
-    {name:'Kettlebell Swing',rx:'3x12 @ 28kg (股関節爆発)'},
-    {name:'Walking',rx:'35min (傾斜 HR130-140)'},
+  Fri:[ // A': デッドリフト+下半身
+    {name:'デッドリフト',rx:'4×4-5 @ 95-100kg (80%) ※腰に張りあれば90kg'},
+    {name:'グルートブリッジ(バンド)',rx:'3×12'},
+    {name:'ステップアップ',rx:'3×8(片脚) @ DB 10-16kg'},
+    {name:'レッグカール',rx:'3×10 (中負荷)'},
+    {name:'自重ジャンプスクワット',rx:'2×5 (瞬発フィニッシャー)'},
+    {name:'傾斜ウォーキング',rx:'20-30min (傾斜15% / 4.5-5.5km/h)'},
   ],
-  Sat:[
-    {name:'Snatch',rx:'5x2 @ 55-60kg (重い・神経系刺激)'},
-    {name:'Jump Squat',rx:'4x3 @ 30kg (軽量・最大速度で挙上)'},
-    {name:'Med Ball Slam',rx:'3x6 (全力・最速で叩きつけ)'},
-    {name:'Broad Jump',rx:'3x5 (最大出力)'},
-    {name:'Walking',rx:'40min (傾斜 HR130-140)'},
+  Sat:[ // D': ベンチ重量日+上半身・体幹
+    {name:'ベンチプレス',rx:'3×3 @ 90kg (重め)'},
+    {name:'ダンベルショルダープレス',rx:'4×8 @ 22-26kg'},
+    {name:'ラットプルダウン',rx:'3×10 (中〜高負荷)'},
+    {name:'ダンベルサイドベンド',rx:'3×12(片側) @ 20kg前後'},
+    {name:'パロフプレス',rx:'3×10 (ケーブル/バンド)'},
+    {name:'アブローラー',rx:'3×8-12 (膝コロ) 週2回目'},
+    {name:'軽ダンベルスイング',rx:'2×8 @ 12-16kg (瞬発フィニッシャー)'},
+    {name:'傾斜ウォーキング',rx:'20-30min (傾斜15% / 4.5-5.5km/h)'},
   ],
-  Sun:[
-    {name:'Kettlebell Swing',rx:'3x8 @ 20kg (全力ヒップエクステンション)'},
-    {name:'Tuck Jump',rx:'4x6 (最大出力・膝を胸に引きつけ)'},
-    {name:'Hip Mobility',rx:'15-20min (90/90・WGS・ピジョン・フロッグ等)'},
-    {name:'Walking',rx:'30min (傾斜 HR130-140)'},
+  Sun:[ // R: 回復日(30-40分)
+    {name:'モビリティ',rx:'15-20min (90/90・カウチ・WGS・ATGスクワット・胸椎・OHスクワット)'},
+    {name:'自重ジャンプスクワット',rx:'3×5 (軽め・疲労を残さない)'},
+    {name:'軽ダンベルスイング',rx:'3×10 (軽め・疲労を残さない)'},
+    {name:'傾斜ウォーキング',rx:'20-30min (傾斜15% / 4.5-5.5km/h)'},
   ],
 };
 
@@ -433,6 +464,7 @@ let logs = load('logs', []);
 let schedule = load('schedule', DEFAULT_SCHEDULE);
 let nextId = load('nextId', 100);
 let todayChecked = load('todayChecked_' + new Date().toISOString().slice(0,10), []);
+let bodyWeights = load('bodyWeights', []);
 
 function getEntry(item){return typeof item==='string'?{name:item,rx:''}:item}
 function getTag(name){
@@ -480,6 +512,76 @@ function renderToday(){
   const todayLogs=logs.filter(l=>l.date===dateStr);
   const lc=document.getElementById('today-log');
   lc.innerHTML=todayLogs.length?todayLogs.map(renderLogEntry).join(''):'<div class="empty">No records yet</div>';
+  renderBodyWeight();
+  renderWeeklyTracker();
+}
+
+// BODY WEIGHT
+function saveBodyWeight(){
+  const v=parseFloat(document.getElementById('bw-input').value);
+  if(!v||v<30||v>200)return;
+  const dateStr=new Date().toISOString().slice(0,10);
+  const idx=bodyWeights.findIndex(w=>w.date===dateStr);
+  if(idx>=0)bodyWeights[idx].weight=v; else bodyWeights.push({date:dateStr,weight:v});
+  bodyWeights.sort((a,b)=>a.date.localeCompare(b.date));
+  save('bodyWeights',bodyWeights);
+  document.getElementById('bw-input').value='';
+  renderBodyWeight();
+}
+function renderBodyWeight(){
+  const dateStr=new Date().toISOString().slice(0,10);
+  const todayW=bodyWeights.find(w=>w.date===dateStr);
+  document.getElementById('bw-today-display').textContent=todayW?`${todayW.weight} kg`:'';
+  // Weekly average
+  const last7=bodyWeights.filter(w=>{const d=new Date(w.date);const ago=new Date();ago.setDate(ago.getDate()-7);return d>=ago});
+  const avg=last7.length?(last7.reduce((s,w)=>s+w.weight,0)/last7.length).toFixed(1):'-';
+  document.getElementById('bw-avg-display').textContent=`Week avg: ${avg} kg (${last7.length} records)`;
+  // History (last 14 days)
+  const recent=bodyWeights.slice(-14);
+  const hc=document.getElementById('bw-history');
+  hc.innerHTML=recent.map((w,i)=>{
+    const prev=i>0?recent[i-1].weight:null;
+    const diff=prev?(w.weight-prev).toFixed(1):null;
+    const cls=diff?(parseFloat(diff)<0?'down':'up'):'';
+    const sign=diff?(parseFloat(diff)>0?'+':'')+diff:'';
+    return `<div class="bw-day"><div class="bwd-date">${w.date.slice(5)}</div><div class="bwd-val">${w.weight}</div>${diff?`<div class="bwd-diff ${cls}">${sign}</div>`:''}</div>`;
+  }).join('');
+}
+
+// WEEKLY TRACKER
+function renderWeeklyTracker(){
+  const now=new Date();
+  const dayOfWeek=now.getDay(); // 0=Sun
+  const mondayOffset=dayOfWeek===0?-6:1-dayOfWeek;
+  const monday=new Date(now);monday.setDate(now.getDate()+mondayOffset);
+  const grid=document.getElementById('weekly-tracker');
+  const dayOrder=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const dayLabels={Mon:'月',Tue:'火',Wed:'水',Thu:'木',Fri:'金',Sat:'土',Sun:'日'};
+  let html='';
+  for(let i=0;i<7;i++){
+    const d=new Date(monday);d.setDate(monday.getDate()+i);
+    const ds=d.toISOString().slice(0,10);
+    const dn=dayOrder[i];
+    const items=schedule[dn]||[];
+    const total=items.length;
+    const checked=load('todayChecked_'+ds,[]);
+    const done=checked.length;
+    const isToday=ds===now.toISOString().slice(0,10);
+    const isPast=d<new Date(now.toISOString().slice(0,10));
+    let cls='tracker-day';
+    if(isToday)cls+=' is-today';
+    if(total>0&&done>=total)cls+=' complete';
+    else if(done>0)cls+=' partial';
+    else if(isPast&&total>0)cls+=' missed';
+    let icon='';
+    if(total===0)icon='-';
+    else if(done>=total)icon='&#10003;';
+    else if(done>0)icon=`${done}/${total}`;
+    else if(isPast)icon='&#10007;';
+    else icon=`0/${total}`;
+    html+=`<div class="${cls}"><div class="td-label">${dayLabels[dn]}</div><div class="td-icon">${icon}</div><div class="td-count">${ds.slice(5)}</div></div>`;
+  }
+  grid.innerHTML=html;
 }
 
 function toggleCheck(i){
@@ -594,12 +696,46 @@ function renderChart(){
   const sel=document.getElementById('progress-exercise');
   const names=[...new Set(logs.map(l=>l.exercise))];
   const cur=sel.value;
-  sel.innerHTML=names.length?names.map(n=>`<option>${n}</option>`).join(''):'<option>No data</option>';
-  if(cur&&names.includes(cur))sel.value=cur;
-  const name=sel.value, exLogs=logs.filter(l=>l.exercise===name).sort((a,b)=>a.date.localeCompare(b.date));
-  const m=menu.find(x=>x.name===name), isW=!m||m.type!=='cardio';
+  let opts=bodyWeights.length?'<option value="__bodyweight__">Body Weight</option>':'';
+  opts+=names.map(n=>`<option>${n}</option>`).join('');
+  if(!opts)opts='<option>No data</option>';
+  sel.innerHTML=opts;
+  if(cur&&(names.includes(cur)||cur==='__bodyweight__'))sel.value=cur;
+  const name=sel.value;
   if(chart)chart.destroy();
   const ctx=document.getElementById('progress-chart').getContext('2d');
+
+  // Body weight chart
+  if(name==='__bodyweight__'){
+    const sorted=[...bodyWeights].sort((a,b)=>a.date.localeCompare(b.date));
+    if(!sorted.length){document.getElementById('progress-summary').innerHTML='<div class="empty">Record body weight to see trend</div>';return}
+    const labels=sorted.map(w=>w.date);
+    // 7-day moving average
+    const movAvg=sorted.map((_,i)=>{
+      const window=sorted.slice(Math.max(0,i-6),i+1);
+      return parseFloat((window.reduce((s,w)=>s+w.weight,0)/window.length).toFixed(1));
+    });
+    chart=new Chart(ctx,{type:'line',data:{labels,datasets:[
+      {label:'Daily',data:sorted.map(w=>w.weight),borderColor:'#58a6ff',backgroundColor:'rgba(88,166,255,0.1)',tension:0.3,fill:true,pointRadius:3},
+      {label:'7-day Avg',data:movAvg,borderColor:'#f0883e',borderDash:[5,3],tension:0.3,fill:false,pointRadius:0}
+    ]},options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#8b949e',font:{size:11}}}},
+      scales:{x:{ticks:{color:'#8b949e',font:{size:10}},grid:{color:'#21262d'}},y:{ticks:{color:'#8b949e'},grid:{color:'#21262d'}}}
+    }});
+    const first=sorted[0].weight,last=sorted[sorted.length-1].weight,diff=(last-first).toFixed(1);
+    const diffColor=parseFloat(diff)<=0?'var(--green)':'var(--red)';
+    document.getElementById('progress-summary').innerHTML=`<div class="stats">
+      <div class="stat"><div class="sv">${sorted.length}</div><div class="sl">Records</div></div>
+      <div class="stat"><div class="sv">${last}kg</div><div class="sl">Latest</div></div>
+      <div class="stat"><div class="sv" style="color:${diffColor}">${parseFloat(diff)>0?'+':''}${diff}kg</div><div class="sl">Change</div></div>
+      <div class="stat"><div class="sv">${movAvg[movAvg.length-1]}kg</div><div class="sl">7d Avg</div></div>
+    </div>`;
+    return;
+  }
+
+  const exLogs=logs.filter(l=>l.exercise===name).sort((a,b)=>a.date.localeCompare(b.date));
+  const m=menu.find(x=>x.name===name), isW=!m||m.type!=='cardio';
   if(!exLogs.length){document.getElementById('progress-summary').innerHTML='<div class="empty">Record workouts to see progress</div>';return}
   const labels=exLogs.map(l=>l.date);
   const ds=isW?[
@@ -676,7 +812,7 @@ document.querySelectorAll('.modal-bg').forEach(el=>{
 
 // EXPORT / IMPORT
 function exportData(){
-  const d={menu,logs,schedule,nextId,exportedAt:new Date().toISOString()};
+  const d={menu,logs,schedule,nextId,bodyWeights,exportedAt:new Date().toISOString()};
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));
   a.download=`kitae_backup_${new Date().toISOString().slice(0,10)}.json`;a.click();
@@ -689,6 +825,7 @@ function importData(){
     if(d.logs){logs=d.logs;save('logs',logs)}
     if(d.schedule){schedule=d.schedule;save('schedule',schedule)}
     if(d.nextId){nextId=d.nextId;save('nextId',nextId)}
+    if(d.bodyWeights){bodyWeights=d.bodyWeights;save('bodyWeights',bodyWeights)}
     renderToday();renderMenu();renderLog();renderSchedule();
   }catch{alert('Invalid file')}};r.readAsText(e.target.files[0])};input.click();
 }
