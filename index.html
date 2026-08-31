@@ -75,6 +75,7 @@ body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:
 .tag-w{background:#1f3a5f;color:var(--accent)}
 .tag-c{background:#1a3d2a;color:var(--green)}
 .tag-p{background:#2d1f4e;color:var(--purple)}
+.tag-s{background:#1a3d3d;color:#2dd4bf}
 
 /* Section title */
 .section{font-size:1rem;font-weight:700;margin:16px 0 8px;display:flex;align-items:center;justify-content:space-between}
@@ -254,6 +255,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
     <div class="menu-grid" id="menu-plyo"></div>
     <div class="section" style="margin-top:16px">Cardio</div>
     <div class="menu-grid" id="menu-cardio"></div>
+    <div class="section" style="margin-top:16px">Stretch / Mobility</div>
+    <div class="menu-grid" id="menu-stretch"></div>
   </div>
 
   <!-- LOG -->
@@ -354,6 +357,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
       <option value="weight">Weight Training</option>
       <option value="plyo">Plyometrics / Power</option>
       <option value="cardio">Cardio</option>
+      <option value="stretch">Stretch / Mobility</option>
     </select>
     <label>Name</label>
     <input type="text" id="menu-name" placeholder="e.g. Bench Press">
@@ -412,11 +416,23 @@ const DEFAULT_MENU = [
   {id:21,type:'plyo',name:'軽ダンベルスイング',target:'Hip Hinge / Light',video:'https://www.youtube.com/results?search_query=ダンベルスイング+軽量+フォーム'},
   // Cardio
   {id:22,type:'cardio',name:'傾斜ウォーキング',target:'Fat Burn / Recovery',video:'https://www.youtube.com/results?search_query=トレッドミル+傾斜ウォーキング+脂肪燃焼'},
+  // Stretch / Mobility
+  {id:23,type:'stretch',name:'90/90ヒップローテーション',target:'Hip Mobility',video:'https://www.youtube.com/results?search_query=90+90+hip+rotation+ストレッチ+やり方'},
+  {id:24,type:'stretch',name:'ワールドグレイテストストレッチ',target:'Full Body Mobility',video:'https://www.youtube.com/results?search_query=ワールドグレイテストストレッチ+やり方'},
+  {id:25,type:'stretch',name:'カウチストレッチ',target:'Hip Flexor / Quad',video:'https://www.youtube.com/results?search_query=カウチストレッチ+やり方+股関節'},
+  {id:26,type:'stretch',name:'ATGスクワットホールド',target:'Ankle / Hip / Deep Squat',video:'https://www.youtube.com/results?search_query=ATG+スクワット+ホールド+やり方'},
+  {id:27,type:'stretch',name:'オーバーヘッドスクワットホールド',target:'Shoulder / Thoracic / Overhead',video:'https://www.youtube.com/results?search_query=オーバーヘッドスクワット+ホールド+モビリティ'},
+  {id:28,type:'stretch',name:'胸椎オープンブック',target:'Thoracic Rotation',video:'https://www.youtube.com/results?search_query=胸椎+オープンブック+ストレッチ+やり方'},
 ];
 
 const DEFAULT_SCHEDULE = {
   Mon:[ // C': 軽スナッチ・スピード+可動域日(約35分)
-    {name:'可動域ドリル',rx:'12min (90/90・WGS・カウチ・ATGスクワット・OHスクワット・胸椎オープンブック)'},
+    {name:'90/90ヒップローテーション',rx:'各45秒'},
+    {name:'ワールドグレイテストストレッチ',rx:'各5回'},
+    {name:'カウチストレッチ',rx:'各60秒'},
+    {name:'ATGスクワットホールド',rx:'45秒×2'},
+    {name:'オーバーヘッドスクワットホールド',rx:'45秒×2 (バーのみ)'},
+    {name:'胸椎オープンブック',rx:'各8回'},
     {name:'スナッチ',rx:'5×2 @ 30-36kg (50-60%) テクニック重視'},
     {name:'軽ダンベルスイング',rx:'3×10 @ 12-16kg'},
     {name:'傾斜ウォーキング',rx:'20-30min (傾斜15% / 4.5-5.5km/h)'},
@@ -463,7 +479,12 @@ const DEFAULT_SCHEDULE = {
     {name:'傾斜ウォーキング',rx:'20-30min (傾斜15% / 4.5-5.5km/h)'},
   ],
   Sun:[ // R: 回復日(30-40分)
-    {name:'モビリティ',rx:'15-20min (90/90・カウチ・WGS・ATGスクワット・胸椎・OHスクワット)'},
+    {name:'90/90ヒップローテーション',rx:'各60秒×2'},
+    {name:'カウチストレッチ',rx:'各90秒'},
+    {name:'ワールドグレイテストストレッチ',rx:'各5回'},
+    {name:'ATGスクワットホールド',rx:'60秒×3'},
+    {name:'胸椎オープンブック',rx:'各10回'},
+    {name:'オーバーヘッドスクワットホールド',rx:'60秒×3 (バーのみ)'},
     {name:'自重ジャンプスクワット',rx:'3×5 (軽め・疲労を残さない)'},
     {name:'軽ダンベルスイング',rx:'3×10 (軽め・疲労を残さない)'},
     {name:'傾斜ウォーキング',rx:'20-30min (傾斜15% / 4.5-5.5km/h)'},
@@ -484,6 +505,7 @@ function getTag(name){
   if(!m) return '';
   if(m.type==='plyo') return '<span class="tag tag-p">Power</span>';
   if(m.type==='cardio') return '<span class="tag tag-c">Cardio</span>';
+  if(m.type==='stretch') return '<span class="tag tag-s">Stretch</span>';
   return '<span class="tag tag-w">Weight</span>';
 }
 
@@ -626,8 +648,8 @@ function quickLog(exName){
 
 // MENU
 function renderMenu(){
-  ['weight','plyo','cardio'].forEach(type=>{
-    const id=type==='weight'?'menu-weight':type==='plyo'?'menu-plyo':'menu-cardio';
+  ['weight','plyo','cardio','stretch'].forEach(type=>{
+    const id=type==='weight'?'menu-weight':type==='plyo'?'menu-plyo':type==='cardio'?'menu-cardio':'menu-stretch';
     const items=menu.filter(m=>m.type===type);
     document.getElementById(id).innerHTML=items.length?items.map(m=>`
       <div class="menu-card">
